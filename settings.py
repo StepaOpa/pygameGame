@@ -1,4 +1,9 @@
-class Display:
+class Screen:
     WIDTH = 800
     HEIGHT = 600
-    BACKGROUND_COLOR = (255, 255, 255)
+    BACKGROUND_COLOR = (0, 0, 0)
+    DISPLAY_RATIO = 2
+
+
+class Player:
+    SPEED = 3
