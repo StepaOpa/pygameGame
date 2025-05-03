@@ -3,7 +3,7 @@ import pygame
 BASE_IMG_PATH = "data/images/"
 
 
-def load_image(path: str) -> pygame.image:
+def load_image(path: str) -> pygame.surface.Surface:
     """
     Load image from "data/images/"
     """

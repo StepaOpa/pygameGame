@@ -5,6 +5,11 @@ class Screen:
     DISPLAY_RATIO = 2
 
 
+class Game:
+    TARGET_FPS = 60
+    DEBUG = False
+
+
 class Player:
     SPEED = 3
 
