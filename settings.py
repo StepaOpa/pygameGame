@@ -7,3 +7,9 @@ class Screen:
 
 class Player:
     SPEED = 3
+
+
+class Enemy:
+    SPEED = 1
+    HEALTH = 3
+    DETECTION_RANGE = 300

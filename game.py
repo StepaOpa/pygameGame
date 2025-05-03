@@ -1,7 +1,7 @@
 import pygame
 import sys
 from settings import Screen
-from Entities import Player
+from entities import Player, Enemy
 
 
 class Game:
@@ -15,13 +15,23 @@ class Game:
         self.player = Player(
             (self.display.get_width()//2, self.display.get_height()//2), 'Player/idle00.png')
 
+        self.enemies = [Enemy((self.display.get_width()//4 + i*50, self.display.get_height()//4),
+                              'Enemies/Vampire/vampire_idle.png', self.player) for i in range(10)]
+
     def run(self):
         while True:
+            # display
             self.display.fill(Screen.BACKGROUND_COLOR)
 
+            # player
             self.player.update()
             self.player.render(self.display)
 
+            for enemy in self.enemies:
+                enemy.update()
+                enemy.render(self.display)
+
+            # events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
