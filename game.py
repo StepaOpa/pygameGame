@@ -2,10 +2,13 @@ import pygame
 import sys
 import settings
 from entities import Player, Enemy
+from map import Tilemap
+import utils
 
 
 class Game:
     def __init__(self):
+
         pygame.init()
         pygame.display.set_caption('MyGame')
         self._screen = pygame.display.set_mode(
@@ -20,11 +23,28 @@ class Game:
                               'Enemies/Vampire/vampire_idle.png', self.player) for i in range(10)]
 
         self.physics_entities = self.enemies + [self.player]
+        self.tiles = {
+            'floor': [utils.load_image('Map/floor_tile_0.png'), utils.load_image('Map/floor_tile_1.png')]
+        }
+
+        self.level_map = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+
+        ]
+        self.tilemap = Tilemap(self.level_map, self.tiles)
 
     def run(self):
         while True:
             # display
             self.display.fill(settings.Screen.BACKGROUND_COLOR)
+            # map
+            self.tilemap.render(self.display)
 
             # delta_time
             delta_time = self.clock.tick(
@@ -39,7 +59,7 @@ class Game:
                 enemy.update(delta_time, self.physics_entities)
                 enemy.render(self.display)
 
-            # events
+              # events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()
