@@ -23,9 +23,6 @@ class Game:
                               'Enemies/Vampire/vampire_idle.png', self.player) for i in range(10)]
 
         self.physics_entities = self.enemies + [self.player]
-        self.tiles = {
-            'floor': [utils.load_image('Map/floor_tile_0.png'), utils.load_image('Map/floor_tile_1.png')]
-        }
 
         self.level_map = [
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -37,14 +34,14 @@ class Game:
             [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
 
         ]
-        self.tilemap = Tilemap(self.level_map, self.tiles)
+        # self.tilemap = Tilemap(self.level_map, self.tiles)
 
     def run(self):
         while True:
             # display
             self.display.fill(settings.Screen.BACKGROUND_COLOR)
             # map
-            self.tilemap.render(self.display)
+            # self.tilemap.render(self.display)
 
             # delta_time
             delta_time = self.clock.tick(
