@@ -27,35 +27,14 @@ class Tilemap:
         return pixel_matrix  # матрица цветов попиксельно
 
     def _generate_map(self):
-        # for y, row in enumerate(self.get_colors_from_template()):
-        #     for x, color in enumerate(row):
-        #         for tile in self.tiles:
-        #             if color == 'BROWN' and tile == 'floor':
-        #                 continue
-        #             if color != tile:
-        #                 continue
-        #             pos = (x * self.tile_size, y * self.tile_size)
-        #             try:
-        #                 # Получаем список вариантов тайлов
-        #                 tile_variants = self.tiles[tile]
-        #                 random_index = random.randint(
-        #                     0, len(tile_variants) - 1)
-        #                 selected_tile = tile_variants[random_index]
-        #                 self.cached_surface.append(selected_tile)
-        #             except KeyError:
-        #                 print(
-        #                     f"Ошибка: ключ '{tile}' отсутствует в tiles. Доступные ключи: {list(self.tiles.keys())}")
-        #             except IndexError:
-        #                 print(f"Ошибка: список тайлов для '{tile}' пуст")
-
         generated = []
         for y, row in enumerate(self.get_colors_from_template()):
             new_row = []
             for x, color in enumerate(row):
                 if color == 'BROWN':  # Пол
                     new_row.append(random.choice(self.tiles['floor']))
-                elif color == 2:  # Стена
-                    new_row.append(self.tiles['wall'][0])
+                elif color == 'BLUE':  # Стена
+                    new_row.append(random.choice(self.tiles['walls']))
                 else:
                     new_row.append(None)
             generated.append(new_row)
@@ -79,10 +58,6 @@ def test():
     tilemap = Tilemap(utils.load_image(
         'Map/chunk_templates/chunck_template_0.png'), tiles)
     pixel_data = tilemap.get_colors_from_template()
-    # for y in range(32):
-    #     for x in range(32):
-    #         pygame.draw.rect(screen, pixel_data[y][x], (x*8, y*8, 8, 8))
-
     screen.fill(settings.Screen.BACKGROUND_COLOR)
 
     print(pixel_data)

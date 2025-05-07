@@ -26,7 +26,7 @@ class Game:
         self.tiles = {tile_type: [utils.load_image(path) for path in paths]
                       for tile_type, paths in settings.Map.TILES.items()}
         self.tilemap = Tilemap(utils.load_image(
-            'Map/chunk_templates/chunck_template_checker16.png'), self.tiles)
+            'Map/chunk_templates/chunck_template_0.png'), self.tiles)
 
     def run(self):
         while True:
@@ -49,7 +49,7 @@ class Game:
                 enemy.update(delta_time, self.physics_entities)
                 enemy.render(self.display)
 
-              # events
+            # events
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     pygame.quit()

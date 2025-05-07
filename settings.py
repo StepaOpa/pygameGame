@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import utils
+import os
 
 
 @dataclass
@@ -15,16 +16,17 @@ class Map:
     TEMPLATE_SIZE = 16
     TILE_SIZE = 16
     TILES = {
-        'floor': ['Map/floor_tile_0.png', 'Map/floor_tile_1.png']
+        'floor': [f'Map/floor/floor_tile_{i}.png' for i in range(len(os.listdir('data/images/Map/floor/')))],
+        'walls': [f'Map/walls/wall_tile_{i}.png' for i in range(len(os.listdir('data/images/Map/walls/')))]
     }
 
     COLORS = {
         'RED': (255, 0, 0, 255),
         'GREEN': (0, 255, 0, 255),
-        'BLUE': (0, 0, 255, 255),
+        'BLUE': (0, 0, 255, 255),  # walls
         'WHITE': (255, 255, 255, 255),
         'BLACK': (0, 0, 0, 255),
-        'BROWN': (143, 86, 59, 255)
+        'BROWN': (143, 86, 59, 255)  # floor
     }
 
 
