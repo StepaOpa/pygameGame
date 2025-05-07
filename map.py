@@ -6,50 +6,73 @@ import settings
 
 class Tilemap:
     def __init__(self, map_template_image: pygame.surface.Surface, tiles: dict[str: tuple[str]]):
-        self.tile_size = 16
+        self.tile_size = settings.Map.TILE_SIZE
+        self.template_size = settings.Map.TEMPLATE_SIZE
         self.offset = pygame.Vector2(0, 0)
         self.tiles = tiles
         self.map_template_image = map_template_image
-        self.cached_surface = None
+        self.cached_map = self._generate_map()
 
     def get_colors_from_template(self):
         colors = settings.Map.COLORS
         colors_reversed = {v: k for k, v in colors.items()}
-        pixel_matrix = [[None for _ in range(32)] for _ in range(32)]
-        for y in range(32):
-            for x in range(32):
+        pixel_matrix = [[None for _ in range(
+            self.template_size)] for _ in range(self.template_size)]
+        for y in range(self.template_size):
+            for x in range(self.template_size):
                 pixel_matrix[y][x] = self.map_template_image.get_at((x, y))
                 if tuple(pixel_matrix[y][x]) in colors.values():
                     pixel_matrix[y][x] = colors_reversed.get(
                         tuple(pixel_matrix[y][x]))
         return pixel_matrix  # матрица цветов попиксельно
 
-    def render(self, surface: pygame.surface.Surface):
+    def _generate_map(self):
+        # for y, row in enumerate(self.get_colors_from_template()):
+        #     for x, color in enumerate(row):
+        #         for tile in self.tiles:
+        #             if color == 'BROWN' and tile == 'floor':
+        #                 continue
+        #             if color != tile:
+        #                 continue
+        #             pos = (x * self.tile_size, y * self.tile_size)
+        #             try:
+        #                 # Получаем список вариантов тайлов
+        #                 tile_variants = self.tiles[tile]
+        #                 random_index = random.randint(
+        #                     0, len(tile_variants) - 1)
+        #                 selected_tile = tile_variants[random_index]
+        #                 self.cached_surface.append(selected_tile)
+        #             except KeyError:
+        #                 print(
+        #                     f"Ошибка: ключ '{tile}' отсутствует в tiles. Доступные ключи: {list(self.tiles.keys())}")
+        #             except IndexError:
+        #                 print(f"Ошибка: список тайлов для '{tile}' пуст")
+
+        generated = []
         for y, row in enumerate(self.get_colors_from_template()):
+            new_row = []
             for x, color in enumerate(row):
-                for tile in self.tiles:
-                    if color == 'BROWN' and tile == 'floor':
-                        continue
-                    if color != tile:
-                        continue
-                    pos = (x * self.tile_size, y * self.tile_size)
-                    try:
-                        # Получаем список вариантов тайлов
-                        tile_variants = self.tiles[tile]
-                        random_index = random.randint(
-                            0, len(tile_variants) - 1)
-                        selected_tile = tile_variants[random_index]
-                        surface.blit(selected_tile, pos)
-                    except KeyError:
-                        print(
-                            f"Ошибка: ключ '{tile}' отсутствует в tiles. Доступные ключи: {list(self.tiles.keys())}")
-                    except IndexError:
-                        print(f"Ошибка: список тайлов для '{tile}' пуст")
+                if color == 'BROWN':  # Пол
+                    new_row.append(random.choice(self.tiles['floor']))
+                elif color == 2:  # Стена
+                    new_row.append(self.tiles['wall'][0])
+                else:
+                    new_row.append(None)
+            generated.append(new_row)
+        return generated
+
+    def render(self, surface: pygame.surface.Surface):
+        for y, row in enumerate(self.cached_map):
+            for x, tile in enumerate(row):
+                if tile:
+                    pos = (x * self.tile_size - self.offset.x,
+                           y * self.tile_size - self.offset.y)
+                    surface.blit(tile, pos)
 
 
 def test():
     pygame.init()
-    screen = pygame.display.set_mode((400, 400))
+    screen = pygame.display.set_mode((800, 800))
     screen.fill((255, 255, 255))
     tiles = {tile_type: [utils.load_image(path) for path in paths]
              for tile_type, paths in settings.Map.TILES.items()}

@@ -23,25 +23,18 @@ class Game:
                               'Enemies/Vampire/vampire_idle.png', self.player) for i in range(10)]
 
         self.physics_entities = self.enemies + [self.player]
-
-        self.level_map = [
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-            [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
-
-        ]
-        # self.tilemap = Tilemap(self.level_map, self.tiles)
+        self.tiles = {tile_type: [utils.load_image(path) for path in paths]
+                      for tile_type, paths in settings.Map.TILES.items()}
+        self.tilemap = Tilemap(utils.load_image(
+            'Map/chunk_templates/chunck_template_checker16.png'), self.tiles)
 
     def run(self):
         while True:
             # display
             self.display.fill(settings.Screen.BACKGROUND_COLOR)
+
             # map
-            # self.tilemap.render(self.display)
+            self.tilemap.render(self.display)
 
             # delta_time
             delta_time = self.clock.tick(
