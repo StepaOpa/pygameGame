@@ -12,9 +12,9 @@ class Game:
         pygame.init()
         pygame.display.set_caption('MyGame')
         self._screen = pygame.display.set_mode(
-            (settings.Screen.WIDTH, settings.Screen.HEIGHT))
+            (settings.ScreenSettngs.WIDTH, settings.ScreenSettngs.HEIGHT))
         self.display = pygame.Surface((self._screen.get_width(
-        )//settings.Screen.DISPLAY_RATIO, self._screen.get_height()//settings.Screen.DISPLAY_RATIO))
+        )//settings.ScreenSettngs.DISPLAY_RATIO, self._screen.get_height()//settings.ScreenSettngs.DISPLAY_RATIO))
         self.clock = pygame.time.Clock()
         self.player = Player(
             (self.display.get_width()//2, self.display.get_height()//2), 'Player/idle00.png')
@@ -26,19 +26,19 @@ class Game:
         self.tiles = {tile_type: [utils.load_image(path) for path in paths]
                       for tile_type, paths in settings.Map.TILES.items()}
         self.tilemap = Tilemap(utils.load_image(
-            'Map/chunk_templates/chunck_template_0.png'), self.tiles)
+            'Map/chunk_templates/chunck_template_1.png'), self.tiles)
 
     def run(self):
         while True:
             # display
-            self.display.fill(settings.Screen.BACKGROUND_COLOR)
+            self.display.fill(settings.ScreenSettngs.BACKGROUND_COLOR)
 
             # map
             self.tilemap.render(self.display)
 
             # delta_time
             delta_time = self.clock.tick(
-                settings.Game.TARGET_FPS) / 1000.0 * settings.Game.TARGET_FPS
+                settings.GameSettings.TARGET_FPS) / 1000.0 * settings.GameSettings.TARGET_FPS
 
             # player
             self.player.update(delta_time, self.physics_entities)
@@ -58,7 +58,7 @@ class Game:
             self._screen.blit(pygame.transform.scale(
                 self.display, self._screen.get_size()))
             pygame.display.update()
-            self.clock.tick(settings.Game.TARGET_FPS)
+            self.clock.tick(settings.GameSettings.TARGET_FPS)
 
 
 Game().run()

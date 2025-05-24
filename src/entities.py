@@ -28,7 +28,7 @@ class PhysicsEntity(Entity):
 
     def render(self, screen):
         super().render(screen)
-        if settings.Game.DEBUG:
+        if settings.GameSettings.DEBUG:
             pygame.draw.rect(screen, (255, 0, 0), self.collider, 1)
 
     @staticmethod
@@ -69,7 +69,7 @@ class PhysicsEntity(Entity):
 class Player(PhysicsEntity):
     def __init__(self, position: tuple[int, int], sprite_path: str):
         super().__init__(position, sprite_path)
-        self.speed = settings.Player.SPEED
+        self.speed = settings.PlayerSettngs.SPEED
 
     def update(self, delta_time: float, entities: list['PhysicsEntity']):
         self.movement = Vector2(0, 0)
@@ -94,10 +94,10 @@ class Player(PhysicsEntity):
 class Enemy(PhysicsEntity):
     def __init__(self, position: tuple[int, int], sprite_path: str, player_reference: Player):
         super().__init__(position, sprite_path)
-        self.health = settings.Enemy.HEALTH
-        self.speed = settings.Enemy.SPEED
+        self.health = settings.EnemySettings.HEALTH
+        self.speed = settings.EnemySettings.SPEED
         self.player = player_reference
-        self.detection_range = settings.Enemy.DETECTION_RANGE
+        self.detection_range = settings.EnemySettings.DETECTION_RANGE
 
     def update(self, delta_time: float, entities: list['PhysicsEntity']):
         direction = Vector2(self.player.position - self.position)
