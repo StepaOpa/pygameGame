@@ -4,6 +4,7 @@ import settings
 from entities import Player, Enemy
 from map import Tilemap
 import utils
+import assets
 
 
 class Game:
@@ -23,10 +24,8 @@ class Game:
                               'Enemies/Vampire/vampire_idle.png', self.player) for i in range(10)]
 
         self.physics_entities = self.enemies + [self.player]
-        self.tiles = {tile_type: [utils.load_image(path) for path in paths]
-                      for tile_type, paths in settings.Map.TILES.items()}
-        self.tilemap = Tilemap(utils.load_image(
-            'Map/chunk_templates/chunck_template_1.png'), self.tiles)
+        self.assets_manager = assets.AssetManager()
+        self.tilemap = Tilemap(self.assets_manager)
 
     def run(self):
         while True:

@@ -6,9 +6,23 @@ from typing import Dict, List, Tuple
 import os
 from settings import GameSettings
 
-# Путь к корневой папке проекта
+
 BASE_DIR = Path(__file__).resolve().parent.parent
 BASE_IMG_PATH = BASE_DIR / 'data' / 'images'
+
+TILE_SETS = {
+    "floor": ("Map/floor", "floor_tile_"),
+    "left_walls": ("Map/walls", "left"),
+    "right_walls": ("Map/walls", "right"),
+    "top_walls": ("Map/walls", "top"),
+    "bottom_walls": ("Map/walls", "bottom"),
+    "corners": ("Map/corners", ""),
+    "wall_empty": ("", "wall_empty.png")
+}
+CHUNK_TEMPLATES = {
+    "chunk_template_0": ("Map/chunk_templates", "0"),
+    "chunk_template_1": ("Map/chunk_templates", "1")
+}
 
 
 @dataclass
@@ -18,7 +32,6 @@ class AssetManager:
     tile_size: int = 16
     template_size: int = 16
 
-    # Автоматическая инициализация
     tiles: Dict[str, List[pygame.Surface]] = field(default_factory=dict)
     chunks: Dict[str, pygame.Surface] = field(default_factory=dict)
     colors: Dict[str, Tuple[int, int, int, int]] = field(default_factory=dict)
@@ -33,24 +46,10 @@ class AssetManager:
 
     def _load_tiles(self):
         """Автоматическая загрузка тайлов из папок"""
-        tile_sets = {
-            "floor": ("Map/floor", "floor_tile_"),
-            "left_walls": ("Map/walls", "left"),
-            "right_walls": ("Map/walls", "right"),
-            "top_walls": ("Map/walls", "top"),
-            "bottom_walls": ("Map/walls", "bottom"),
-            "corners": ("Map/corners", ""),
-            "wall_empty": ("", "wall_empty.png")  # Отдельный файл
-        }
-        chunсk_templates = {
-            "chunk_template_0": ("Map/chunk_templates", "0"),
-            "chunk_template_1": ("Map/chunk_templates", "1")
-        }
-
-        for name, (folder, pattern) in tile_sets.items():
+        for name, (folder, pattern) in TILE_SETS.items():
             self.tiles[name] = self._load_tile_set(folder, pattern)
 
-        for name, (folder, index) in chunсk_templates.items():
+        for name, (folder, index) in CHUNK_TEMPLATES.items():
             self.chunks[name] = self._load_chunks(index)
 
     def _load_chunks(self, index: int) -> pygame.Surface:
@@ -65,7 +64,7 @@ class AssetManager:
         if not path.is_dir() and not pattern.endswith(".png"):
             return []
 
-        if pattern.endswith(".png"):  # Для отдельных файлов
+        if pattern.endswith(".png"):
             file_path = Path(self.base_path) / folder / pattern
             return [self._load_image(file_path)] if file_path.exists() else []
 
@@ -92,7 +91,7 @@ class AssetManager:
         """Создает тайл-заглушку"""
         surf = pygame.Surface(
             (self.tile_size, self.tile_size), pygame.SRCALPHA)
-        surf.fill((255, 0, 255, 128))  # Фиолетовый полупрозрачный
+        surf.fill((255, 0, 255, 128))
         pygame.draw.rect(
             surf, (0, 0, 0), (0, 0, self.tile_size, self.tile_size), 1)
         return surf

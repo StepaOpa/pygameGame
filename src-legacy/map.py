@@ -57,27 +57,22 @@ class Tilemap:
         if matrix_of_surrounding_pixels[2][1] == 'BROWN':
             print('topwalls')
             return self.asset_manager.get_random_tile('top_walls')
-
-            return random.choice(self.tiles['top_walls'])
         if matrix_of_surrounding_pixels[0][1] == 'BROWN':
             return self.asset_manager.get_random_tile('bottom_walls')
-
-            return random.choice(self.tiles['bottom_walls'])
-        if matrix_of_surrounding_pixels[1][2] == 'BROWN' or (matrix_of_surrounding_pixels[1][2] == 'GREEN' and matrix_of_surrounding_pixels[2][1] == 'GREEN' and matrix_of_surrounding_pixels[1][0] != 'BROWN' and matrix_of_surrounding_pixels[2][2] == 'BROWN'):
+        if matrix_of_surrounding_pixels[1][2] == 'BROWN' \
+            or (matrix_of_surrounding_pixels[1][2] == 'GREEN'
+                and matrix_of_surrounding_pixels[2][1] == 'GREEN'
+                and matrix_of_surrounding_pixels[1][0] != 'BROWN'
+                and matrix_of_surrounding_pixels[2][2] == 'BROWN'):
             return self.asset_manager.get_random_tile('left_walls')
-            return random.choice(self.tiles['left_walls'])
-        if matrix_of_surrounding_pixels[1][0] == 'BROWN' or (matrix_of_surrounding_pixels[1][0] == 'GREEN' and matrix_of_surrounding_pixels[2][1] == 'GREEN'):
+        if matrix_of_surrounding_pixels[1][0] == 'BROWN' \
+            or (matrix_of_surrounding_pixels[1][0] == 'GREEN'
+                and matrix_of_surrounding_pixels[2][1] == 'GREEN'):
             return self.asset_manager.get_random_tile('right_walls')
-            return random.choice(self.tiles['right_walls'])
-        # if matrix_of_surrounding_pixels[0][1] == 'GREEN' and matrix_of_surrounding_pixels[1][2] == 'GREEN' and matrix_of_surrounding_pixels[0][2] == 'BROWN':
-        #     return (self.tiles['wall_corners']['wall_tile_corner_left_down_outer.png'])
-        if matrix_of_surrounding_pixels[1][0] == 'GREEN' and matrix_of_surrounding_pixels[0][1] == 'GREEN' and matrix_of_surrounding_pixels[0][0] == 'BROWN':
-            return self.asset_manager.get_random_tile('wall_corners')
-            return (self.tiles['wall_corners'][1])
-        # if matrix_of_surrounding_pixels[1][2] == 'GREEN' and matrix_of_surrounding_pixels[2][1] == 'GREEN':
-        #     return
-        # if matrix_of_surrounding_pixels[]
-        # if
+        if matrix_of_surrounding_pixels[1][0] == 'GREEN' \
+            and matrix_of_surrounding_pixels[0][1] == 'GREEN' \
+                and matrix_of_surrounding_pixels[0][0] == 'BROWN':
+            return self.asset_manager.get_random_tile('corners')
         return self.asset_manager.get_random_tile('floor')
 
     def render(self, surface: pygame.surface.Surface):
