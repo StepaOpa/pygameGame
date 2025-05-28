@@ -1,62 +1,26 @@
-from ecs import *
-import pygame
 from components import *
+from entity_component_system import EntityComponentSystem
+from ecs_types import EntityId
 
 
-class InputSystem(System):
-    def update(self, delta_time):
-        keys = pygame.key.get_pressed()
-        for entity in self.ecs.get_entities_with(PlayerController, Physics):
-            controller = entity.components[PlayerController]
-            physics = entity.components[Physics]
-
-            velocity = [0, 0]
-            if keys[pygame.K_a]:
-                velocity[0] -= 1
-            if keys[pygame.K_d]:
-                velocity[0] += 1
-            if keys[pygame.K_w]:
-                velocity[1] -= 1
-            if keys[pygame.K_s]:
-                velocity[1] += 1
-
-            physics.velocity = (
-                velocity[0] * controller.speed,
-                velocity[1] * controller.speed
-            )
+def velocity_system(velocity: VelocityComponent, collider: ColliderComponent):
+    collider.x += velocity.speed_x
+    collider.y += velocity.speed_y
 
 
-class PhysicsSystem(System):
-    def update(self, delta_time):
-        for entity in self.ecs.get_entities_with(Physics, Transform):
-            physics = entity.components[Physics]
-            transform = entity.components[Transform]
-            transform.x += physics.velocity_x * delta_time
-            transform.y += physics.velocity_y * delta_time
-
-
-class RenderSystem(System):
-    def update(self, delta_time):
-        camera = next((e for e in self.ecs.entities.values()
-                      if Camera in e.components), None)
-        if not camera:
+def damage_on_contact_system(entity_id: EntityId,
+                             ecs: EntityComponentSystem,
+                             damage_on_contact: DamageOnContactComponent,
+                             collider: ColliderComponent):
+    for enemy_id, (enemy_health, enemy_collider) in ecs.get_entities_with_components(HealthComponent,
+                                                                                     ColliderComponent):
+        if collider.is_intersecting(enemy_collider):
+            enemy_health.apply_damage(damage_on_contact.damage)
+            if damage_on_contact.die_on_contact:
+                ecs.remove_entity(entity_id)
             return
 
-        camera_comp = camera.components[Camera]
-        camera_comp.surface.fill((0, 0, 0))
 
-        for entity in self.ecs.entities.values():
-            if Transform in entity.components and Sprite in entity.components:
-                transform = entity.components[Transform]
-                sprite = entity.components[Sprite]
-
-                if not sprite.rect:
-                    sprite.rect = sprite.image.get_rect()
-
-                sprite.rect.center = transform.position
-                camera_comp.surface.blit(sprite.image, sprite.rect)
-
-        scaled_surface = pygame.transform.scale(
-            camera_comp.surface, camera_comp.display_surface.get_size())
-        camera_comp.display_surface.blit(scaled_surface, (0, 0))
-        pygame.display.update()
+def death_system(entity_id: EntityId, health: HealthComponent, ecs: EntityComponentSystem):
+    if health.amount <= 0:
+        ecs.remove_entity(entity_id)

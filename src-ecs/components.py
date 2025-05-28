@@ -1,51 +1,40 @@
-from dataclasses import dataclass
-from ecs import Component, Entity
-import pygame
+from dataclasses import dataclass, field
+import math
 
 
-@dataclass
-class Transform(Component):
+@dataclass(slots=True)
+class ColliderComponent:
     x: float
     y: float
-    rotation: float = 0.0
-    scale: tuple[float, float] = (1, 1)
+    radius: float
 
-    @property
-    def position(self) -> tuple[float, float]:
-        return (self.x, self.y)
+    def distance(self, other: 'ColliderComponent'):
+        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
 
-
-@dataclass
-class Sprite(Component):
-    image: pygame.Surface
-    rect: pygame.Rect = None
+    def is_intersecting(self, other: 'ColliderComponent'):
+        return self.distance(other) <= self.radius + other.radius
 
 
-@dataclass
-class Physics(Component):
-    velocity_x: float = 0.0
-    velocity_y: float = 0.0
-    сollider: pygame.Rect = None
-    gravity: float = 0.0
+@dataclass(slots=True)
+class VelocityComponent:
+    speed_x: float = 0.0
+    speed_y: float = 0.0
 
 
-@dataclass
-class PlayerController(Component):
-    speed: float = 200.0
+@dataclass(slots=True)
+class DamageOnContactComponent:
+    damage: int
+    die_on_contact: bool = True
 
 
-@dataclass
-class EnemyAI(Component):
-    target: Entity = None
-    speed: float = 100.0
+@dataclass(slots=True)
+class HealthComponent:
+    max_amount: int
+    amount: int = field(default=None)
 
+    def __post_init__(self):
+        if self.amount is None:
+            self.amount = self.max_amount
 
-@dataclass
-class Camera(Component):
-    surface: pygame.Surface
-    display_surface: pygame.Surface
-
-
-@dataclass
-class PlayerController(Component):
-    speed: float = 200.0
+    def apply_damage(self, damage: int):
+        self.amount = max(0, self.amount - damage)
