@@ -1,15 +1,21 @@
 from dataclasses import dataclass, field
 import math
+import settings
+import pygame
+from typing import List, Optional
+
+
+class PlayerTag:
+    pass
 
 
 @dataclass(slots=True)
 class ColliderComponent:
-    x: float
-    y: float
-    radius: float
+    position: pygame.Vector2
+    radius: float = 0
 
     def distance(self, other: 'ColliderComponent'):
-        return math.sqrt((self.x - other.x) ** 2 + (self.y - other.y) ** 2)
+        return math.sqrt((self.position.x - other.position.x) ** 2 + (self.position.y - other.position.y) ** 2)
 
     def is_intersecting(self, other: 'ColliderComponent'):
         return self.distance(other) <= self.radius + other.radius
@@ -17,8 +23,7 @@ class ColliderComponent:
 
 @dataclass(slots=True)
 class VelocityComponent:
-    speed_x: float = 0.0
-    speed_y: float = 0.0
+    velocity: pygame.Vector2 = field(default_factory=lambda: pygame.Vector2(0, 0))
 
 
 @dataclass(slots=True)
@@ -38,3 +43,50 @@ class HealthComponent:
 
     def apply_damage(self, damage: int):
         self.amount = max(0, self.amount - damage)
+
+
+@dataclass(slots=True)
+class TilemapComponent:
+    cell_size: int = settings.TileMap.TILE_SIZE
+    map_width: int = field(
+        default_factory=lambda: settings.TileMap.MAP_WIDTH)
+    map_height: int = field(
+        default_factory=lambda: settings.TileMap.MAP_HEIGHT)
+    tiles: List[int] = field(default_factory=lambda: [0, 1])
+    is_rendered: bool = False
+    cached_tilemap: List[pygame.Color] = field(default_factory=list)
+
+
+@dataclass(slots=True)
+class TileComponent:
+    tile_type: int
+    rect: pygame.Rect = None
+
+
+@dataclass(slots=True)
+class RenderTargetComponent:
+    surface: pygame.Surface = None
+
+
+@dataclass(slots=True)
+class PositionComponent:
+    position: pygame.Vector2
+
+
+@dataclass(slots=True)
+class RenderComponent:
+    sprite: Optional[pygame.Surface] = None
+    rect: Optional[pygame.Rect] = None
+    color: pygame.Color = field(
+        default_factory=lambda: pygame.Color(255, 255, 255))
+    scale: float = 1.0
+
+    def get_width(self) -> int:
+        if self.sprite:
+            return int(self.sprite.get_width() * self.scale)
+        return 0
+
+    def get_height(self) -> int:
+        if self.sprite:
+            return int(self.sprite.get_height() * self.scale)
+        return 0

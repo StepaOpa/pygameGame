@@ -12,9 +12,11 @@ class ScreenSettngs:
 
 
 @dataclass
-class Map:
+class TileMap:
+    MAP_WIDTH = 16
+    MAP_HEIGHT = 16
+    TILE_SIZE = 8
     #     TEMPLATE_SIZE = 16
-    #     TILE_SIZE = 16
     #     TILES = {
     #         'floor': [f'Map/floor/floor_tile_{i}.png' for i in range(len(os.listdir('data/images/Map/floor/')))],
     #         'left_walls': [f'Map/walls/{tilename}' for tilename in os.listdir('data/images/Map/walls/') if 'left' in tilename],
@@ -44,7 +46,7 @@ class GameSettings:
 
 
 @dataclass
-class PlayerSettngs:
+class PlayerSettings:
     SPEED = 3
 
 
