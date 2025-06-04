@@ -4,7 +4,7 @@ import pygame
 import random
 from typing import Dict, List, Tuple
 import os
-from settings import GameSettings
+from settings import GameSettings, TileMap
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -33,6 +33,8 @@ class AssetManager:
     template_size: int = 16
 
     tiles: Dict[str, List[pygame.Surface]] = field(default_factory=dict)
+    tile_sprites: Dict[str, pygame.Surface] = field(default_factory=dict)
+    sprite_cache: Dict[str, pygame.Surface] = field(default_factory=dict)
     chunks: Dict[str, pygame.Surface] = field(default_factory=dict)
     colors: Dict[str, Tuple[int, int, int, int]] = field(default_factory=dict)
 
@@ -43,6 +45,7 @@ class AssetManager:
         """Загружает все ресурсы при инициализации"""
         self._load_tiles()
         self._load_colors()
+        self._load_tile_sprites()
 
     def _load_tiles(self):
         """Автоматическая загрузка тайлов из папок"""
@@ -78,10 +81,6 @@ class AssetManager:
         """Безопасная загрузка изображения"""
         try:
             img = pygame.image.load(str(path)).convert_alpha()
-            # if img.get_size() != (self.tile_size, self.tile_size):
-            #     img = pygame.transform.scale(
-            #         img, (self.tile_size, self.tile_size))
-            #     img.set_colorkey((0, 0, 0))
             return img
         except (pygame.error, FileNotFoundError) as e:
             print(f"Error loading {path}: {e}")
@@ -107,6 +106,22 @@ class AssetManager:
             "BROWN": (143, 86, 59, 255)
         }
 
+    def _load_tile_sprites(self):
+        """Загружает спрайты тайлов для карты"""
+        for variant, path in TileMap.TILE_VARIANTS.items():
+            full_path = self.base_path / path
+            try:
+                sprite = pygame.image.load(str(full_path)).convert_alpha()
+                self.tile_sprites[variant] = sprite
+            except pygame.error as e:
+                print(f"Couldn't load tile sprite {path}: {e}")
+                sprite = self._create_placeholder()
+                self.tile_sprites[variant] = sprite
+
+    def get_tile_sprite(self, variant: str) -> pygame.Surface:
+        """Получает спрайт тайла по его варианту"""
+        return self.tile_sprites.get(variant, self._create_placeholder())
+
     def get_chunk(self, chunk_type: str) -> pygame.Surface:
         """Возвращает чанк указанного типа"""
         return self.chunks.get(chunk_type, [0])
@@ -127,11 +142,12 @@ class AssetManager:
         """Возвращает цвет по имени"""
         return self.colors.get(color_name, (0, 0, 0, 255))
 
-    def get_sprite(self, sprite_name: str) -> pygame.Surface:
-        """Возвращает спрайт по имени data/images... """
-        path = BASE_IMG_PATH / sprite_name
-        if path.exists():
-            return self._load_image(path)
-        else:
-            print(f"Sprite {sprite_name} not found!")
-            return self._create_placeholder()
+    def get_sprite(self, sprite_path: str) -> pygame.Surface:
+        """Возвращает спрайт по пути, используя кэш"""
+        if sprite_path in self.sprite_cache:
+            return self.sprite_cache[sprite_path]
+        
+        path = self.base_path / sprite_path
+        sprite = self._load_image(path)
+        self.sprite_cache[sprite_path] = sprite
+        return sprite

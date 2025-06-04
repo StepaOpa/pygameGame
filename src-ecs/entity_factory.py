@@ -15,7 +15,7 @@ class EntityFactory:
 
     def create_map(self) -> EntityId:
         return self.ecs.create_entity(
-            [TilemapComponent(), RenderTargetComponent(surface=self.display)]
+            [TilemapComponent(), RenderTargetComponent(surface=self.display, assets=self.assets)]
         )
 
     def create_player(self, x, y) -> EntityId:
@@ -30,7 +30,7 @@ class EntityFactory:
                     sprite=sprite,
                     scale=1.0
                 ),
-                RenderTargetComponent(surface=self.display),
+                RenderTargetComponent(surface=self.display, assets=self.assets),
                 PlayerTag(),
                 ColliderComponent(position=position)
             ]
@@ -50,7 +50,7 @@ class EntityFactory:
                 VelocityComponent(velocity=velocity),
                 DamageOnContactComponent(damage),
                 RenderComponent(),
-                RenderTargetComponent(surface=self.display)
+                RenderTargetComponent(surface=self.display, assets=self.assets)
             ]
         )
 
@@ -63,6 +63,6 @@ class EntityFactory:
                 ColliderComponent(position=position, radius=dummy_radius),
                 HealthComponent(max_amount=health),
                 RenderComponent(),
-                RenderTargetComponent(surface=self.display)
+                RenderTargetComponent(surface=self.display, assets=self.assets)
             ]
         )

@@ -2,7 +2,7 @@ from dataclasses import dataclass, field
 import math
 import settings
 import pygame
-from typing import List, Optional
+from typing import List, Optional, Dict, Any, Tuple
 
 
 class PlayerTag:
@@ -48,13 +48,25 @@ class HealthComponent:
 @dataclass(slots=True)
 class TilemapComponent:
     cell_size: int = settings.TileMap.TILE_SIZE
-    map_width: int = field(
-        default_factory=lambda: settings.TileMap.MAP_WIDTH)
-    map_height: int = field(
-        default_factory=lambda: settings.TileMap.MAP_HEIGHT)
-    tiles: List[int] = field(default_factory=lambda: [0, 1])
+    map_width: int = field(default_factory=lambda: settings.TileMap.MAP_WIDTH)
+    map_height: int = field(default_factory=lambda: settings.TileMap.MAP_HEIGHT)
+    template_path: str = field(default_factory=lambda: settings.TileMap.TEMPLATE_PATH)
+    tiles: List[str] = field(default_factory=list)
     is_rendered: bool = False
-    cached_tilemap: List[pygame.Color] = field(default_factory=list)
+    cached_tilemap: List[List[Dict[str, Any]]] = field(default_factory=list)  # Will store tile type and variant
+    scaled_cache: Dict[Tuple[int, int], pygame.Surface] = field(default_factory=dict)  # Cache for scaled sprites
+
+    def regenerate(self):
+        """Очищает кэш карты, что приведет к её перегенерации"""
+        self.cached_tilemap = []
+        self.scaled_cache.clear()  # Очищаем кэш масштабированных спрайтов
+
+    def get_scaled_sprite(self, sprite: pygame.Surface, size: int) -> pygame.Surface:
+        """Получает масштабированный спрайт из кэша или создает новый"""
+        cache_key = (id(sprite), size)
+        if cache_key not in self.scaled_cache:
+            self.scaled_cache[cache_key] = pygame.transform.scale(sprite, (size, size))
+        return self.scaled_cache[cache_key]
 
 
 @dataclass(slots=True)
@@ -66,6 +78,7 @@ class TileComponent:
 @dataclass(slots=True)
 class RenderTargetComponent:
     surface: pygame.Surface = None
+    assets: Optional['AssetManager'] = None
 
 
 @dataclass(slots=True)
