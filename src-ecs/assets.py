@@ -78,10 +78,10 @@ class AssetManager:
         """Безопасная загрузка изображения"""
         try:
             img = pygame.image.load(str(path)).convert_alpha()
-            if img.get_size() != (self.tile_size, self.tile_size):
-                img = pygame.transform.scale(
-                    img, (self.tile_size, self.tile_size))
-                img.set_colorkey((0, 0, 0))
+            # if img.get_size() != (self.tile_size, self.tile_size):
+            #     img = pygame.transform.scale(
+            #         img, (self.tile_size, self.tile_size))
+            #     img.set_colorkey((0, 0, 0))
             return img
         except (pygame.error, FileNotFoundError) as e:
             print(f"Error loading {path}: {e}")

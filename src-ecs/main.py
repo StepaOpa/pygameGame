@@ -49,7 +49,7 @@ class Game:
         # map
         self.factory.create_map()
         # player
-        self.factory.create_player(100,100)
+        self.factory.create_player(100, 100)
 
     def run(self):
         while self.running:
