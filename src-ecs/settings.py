@@ -22,7 +22,7 @@ class GameSettings:
 class TileMap:
     MAP_WIDTH = 16
     MAP_HEIGHT = 16
-    TILE_SIZE = 12
+    TILE_SIZE = 16
     TEMPLATE_PATH = str(GameSettings.BASE_DIR / 'data' / 'images' / 'Map' / 'chunk_templates' / 'chunck_template_checker_pro.png')
     
     FLOOR_TILES = [f'Map/floor/floor_tile_{i}.png' for i in range(12)]  # От 0 до 11

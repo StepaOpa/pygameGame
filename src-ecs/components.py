@@ -3,37 +3,44 @@ import math
 import settings
 import pygame
 from typing import List, Optional, Dict, Any, Tuple
+from abc import ABC
 
 
-class PlayerTag:
+class Component(ABC):
+    """Базовый класс для всех компонентов"""
     pass
 
 
 @dataclass(slots=True)
-class ColliderComponent:
+class PlayerTag(Component):
+    pass
+
+
+@dataclass(slots=True)
+class Collider(Component):
     position: pygame.Vector2
     radius: float = 0
 
-    def distance(self, other: 'ColliderComponent'):
+    def distance(self, other: 'Collider'):
         return math.sqrt((self.position.x - other.position.x) ** 2 + (self.position.y - other.position.y) ** 2)
 
-    def is_intersecting(self, other: 'ColliderComponent'):
+    def is_intersecting(self, other: 'Collider'):
         return self.distance(other) <= self.radius + other.radius
 
 
 @dataclass(slots=True)
-class VelocityComponent:
+class Velocity(Component):
     velocity: pygame.Vector2 = field(default_factory=lambda: pygame.Vector2(0, 0))
 
 
 @dataclass(slots=True)
-class DamageOnContactComponent:
+class DamageOnContact(Component):
     damage: int
     die_on_contact: bool = True
 
 
 @dataclass(slots=True)
-class HealthComponent:
+class Health(Component):
     max_amount: int
     amount: int = field(default=None)
 
@@ -46,53 +53,43 @@ class HealthComponent:
 
 
 @dataclass(slots=True)
-class TilemapComponent:
-    cell_size: int = settings.TileMap.TILE_SIZE
-    map_width: int = field(default_factory=lambda: settings.TileMap.MAP_WIDTH)
-    map_height: int = field(default_factory=lambda: settings.TileMap.MAP_HEIGHT)
-    template_path: str = field(default_factory=lambda: settings.TileMap.TEMPLATE_PATH)
-    tiles: List[str] = field(default_factory=list)
-    is_rendered: bool = False
-    cached_tilemap: List[List[Dict[str, Any]]] = field(default_factory=list)  # Will store tile type and variant
-    scaled_cache: Dict[Tuple[int, int], pygame.Surface] = field(default_factory=dict)  # Cache for scaled sprites
-
-    def regenerate(self):
-        """Очищает кэш карты, что приведет к её перегенерации"""
-        self.cached_tilemap = []
-        self.scaled_cache.clear()  # Очищаем кэш масштабированных спрайтов
-
-    def get_scaled_sprite(self, sprite: pygame.Surface, size: int) -> pygame.Surface:
-        """Получает масштабированный спрайт из кэша или создает новый"""
-        cache_key = (id(sprite), size)
-        if cache_key not in self.scaled_cache:
-            self.scaled_cache[cache_key] = pygame.transform.scale(sprite, (size, size))
-        return self.scaled_cache[cache_key]
+class TileComponent(Component):
+    tile_type: str
+    walkable: bool
+    variant: str = '0'
 
 
 @dataclass(slots=True)
-class TileComponent:
+class GridPosition(Component):
+    x: int
+    y: int
+
+
+@dataclass(slots=True)
+class Tile(Component):
     tile_type: int
     rect: pygame.Rect = None
 
 
 @dataclass(slots=True)
-class RenderTargetComponent:
+class RenderTarget(Component):
     surface: pygame.Surface = None
     assets: Optional['AssetManager'] = None
 
 
 @dataclass(slots=True)
-class PositionComponent:
+class Position(Component):
     position: pygame.Vector2
 
 
 @dataclass(slots=True)
-class RenderComponent:
+class Render(Component):
     sprite: Optional[pygame.Surface] = None
     rect: Optional[pygame.Rect] = None
     color: pygame.Color = field(
         default_factory=lambda: pygame.Color(255, 255, 255))
     scale: float = 1.0
+    layer: int = 0
 
     def get_width(self) -> int:
         if self.sprite:

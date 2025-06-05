@@ -3,6 +3,12 @@ import random
 import settings
 from assets import AssetManager
 import debug
+from components import TileComponent, GridPosition, Render
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from entity_factory import EntityFactory
+
 def get_tile_type_by_color(color):
     """Определяет тип тайла по его цвету"""
     for tile_type, tile_color in settings.TileMap.COLORS.items():
@@ -50,72 +56,35 @@ def get_tile_variant(x, y, pixel_array, width, height):
             return 'bottom_left_corner'
         #TODO
         #дописать углы
+        if down == 'floor' and down_right == 'floor' and right == 'floor' and left == 'wall' and up == 'wall':
+            return 'top'
+        if up == 'wall' and right == 'wall' and up_right == 'floor':
+            return 'bottom_right_corner'
         return None
     
     if corners_checks() == None:
         return wall_checks()
     return corners_checks()
 
-    # Если не определили особый случай, выбираем по наличию пола
-    if left == 'floor':
-        return 'left'
-    if right == 'floor':
-        return 'right'
-    if up == 'floor':
-        return 'top'
-    if down == 'floor':
-        return 'bottom'
-
-    return 'empty' 
-
-def generate_tilemap_from_template(template_path):
-    """Генерирует карту из шаблона"""
+def generate_tile_entities_from_template(template_path: str, factory: "EntityFactory"):
+    """Генерирует сущности тайлов из шаблона"""
     template = pygame.image.load(template_path).convert_alpha()
     width, height = template.get_size()
     pixel_array = pygame.PixelArray(template)
     
-    tilemap = [[None] * height for _ in range(width)]
-    
     for x in range(width):
         for y in range(height):
             pixel_value = pixel_array[x, y]
-            # Преобразуем значение пикселя в RGBA
             color = pygame.Color(*template.unmap_rgb(pixel_value))
             tile_type = get_tile_type_by_color((color.r, color.g, color.b, color.a))
             
             if tile_type != 'empty':
+                walkable = (tile_type == 'floor')
                 if tile_type == 'wall':
                     variant = get_tile_variant(x, y, pixel_array, width, height)
                 else:  # floor
                     variant = random.choice(settings.TileMap.FLOOR_TILES)
                 
-                tilemap[x][y] = {
-                    'type': tile_type,
-                    'variant': variant
-                }
+                factory.create_tile(x, y, tile_type, variant, walkable)
     
     del pixel_array
-    return tilemap
-
-def render_tilemap(tilemap_component, surface, assets: AssetManager):
-    """Отрисовывает карту на поверхности"""
-    tilemap = tilemap_component.cached_tilemap
-    cell_size = tilemap_component.cell_size
-
-    for x in range(len(tilemap)):
-        for y in range(len(tilemap[0])):
-            tile_data = tilemap[x][y]
-            if tile_data is not None:
-                variant = tile_data['variant']
-                if tile_data['type'] == 'floor':
-                    sprite = assets.get_sprite(variant)
-                else:
-                    sprite = assets.get_tile_sprite(variant)
-                
-                if sprite:
-                    scaled_sprite = tilemap_component.get_scaled_sprite(sprite, cell_size)
-                    surface.blit(scaled_sprite, (x * cell_size, y * cell_size))
-                else:
-                    # Fallback to colored rectangle if sprite not found
-                    pygame.draw.rect(surface, settings.TileMap.COLORS[tile_data['type']], 
-                                  pygame.Rect(x * cell_size, y * cell_size, cell_size, cell_size))
