@@ -17,6 +17,19 @@ class PlayerTag(Component):
 
 
 @dataclass(slots=True)
+class TurnComponent(Component):
+    """Компонент для отслеживания состояния хода"""
+    is_player_turn: bool = True
+    player_moved: bool = False  # Флаг, показывающий, сделал ли игрок ход
+    turn_count: int = 0  # Счетчик ходов игрока
+
+
+@dataclass(slots=True)
+class EnemyTag(Component):
+    pass
+
+
+@dataclass(slots=True)
 class Collider(Component):
     position: pygame.Vector2
     radius: float = 0

@@ -37,6 +37,8 @@ class Game:
         self.ecs.init_component(RenderTarget)
         self.ecs.init_component(Render)
         self.ecs.init_component(PlayerTag)
+        self.ecs.init_component(EnemyTag)
+        self.ecs.init_component(TurnComponent)
 
         # add variables
         self.ecs.add_variable('render_target', RenderTarget(surface=self.display, assets=self.assets))
@@ -48,53 +50,44 @@ class Game:
         self.ecs.add_system(DamageOnContactSystem())
         self.ecs.add_system(DeathSystem())
         self.ecs.add_system(RenderSystem())
+        self.enemy_pathfinding_system = EnemyPathfindingSystem()
+        self.ecs.add_system(self.enemy_pathfinding_system)
 
         # map
         self.factory.create_map()
         # player
         self.factory.create_player(2, 2)
+        # enemy
+        self.factory.create_enemy()
+        self.factory.create_enemy()
+        
+        # Создаем сущность для управления ходами
+        self.ecs.create_entity([TurnComponent()])
 
     def run(self):
         render_system: RenderSystem = self.ecs.get_system(RenderSystem)
         
         while self.running:
-            for event in pygame.event.get():
+            events = pygame.event.get()
+            self.ecs.add_variable('events', events)
+
+            for event in events:
                 if event.type == pygame.QUIT:
                     self.running = False
-                if event.type == pygame.KEYDOWN:
-                    self.handle_input(event.key)
-
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        self.running = False
 
             self.display.fill(Color('black'))
             self.ecs.update()
             render_system.draw_all(self.ecs)
+            self.enemy_pathfinding_system.draw_debug(self.ecs)
             
             self._screen.blit(pygame.transform.scale(
                 self.display, self._screen.get_size()), (0, 0))
             pygame.display.flip()
 
             self.clock.tick(60)
-
-    def handle_input(self, key):
-        player_entities = list(self.ecs.get_entities_with_components(PlayerTag, GridPosition))
-        if not player_entities:
-            return
-            
-        player_id, (player_tag, grid_pos) = player_entities[0]
-        
-        movement_system: GridMovementSystem = self.ecs.get_system(GridMovementSystem)
-
-        dx, dy = 0, 0
-        if key == pygame.K_LEFT or key == pygame.K_a: dx = -1
-        if key == pygame.K_RIGHT or key == pygame.K_d: dx = 1
-        if key == pygame.K_UP or key == pygame.K_w: dy = -1
-        if key == pygame.K_DOWN or key == pygame.K_s: dy = 1
-
-        if dx != 0 or dy != 0:
-            new_x, new_y = grid_pos.x + dx, grid_pos.y + dy
-            if movement_system.is_walkable(new_x, new_y, self.ecs):
-                grid_pos.x = new_x
-                grid_pos.y = new_y
 
 
 if __name__ == "__main__":

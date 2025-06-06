@@ -7,6 +7,7 @@ import math
 from ecs_types import EntityId
 from map_generator import generate_tile_entities_from_template
 import settings
+import random
 
 
 class EntityFactory:
@@ -83,5 +84,38 @@ class EntityFactory:
                 Health(max_amount=health),
                 Render(),
                 RenderTarget(surface=self.display, assets=self.assets)
+            ]
+        )
+
+    def create_enemy(self) -> EntityId:
+        # Получаем все проходимые клетки
+        walkable_positions = []
+        for entity_id, (grid_pos, tile) in self.ecs.get_entities_with_components(GridPosition, TileComponent):
+            if tile.walkable:
+                walkable_positions.append((grid_pos.x, grid_pos.y))
+        
+        if not walkable_positions:
+            return None
+        
+        # Выбираем случайную проходимую клетку
+        x, y = random.choice(walkable_positions)
+        position = pygame.Vector2(x * settings.TileMap.TILE_SIZE, y * settings.TileMap.TILE_SIZE)
+        
+        # Используем спрайт врага
+        sprite = self.assets.get_sprite('Enemies/Vampire/vampire_idle.png')
+        
+        return self.ecs.create_entity(
+            [
+                Position(position=position),
+                GridPosition(x=x, y=y),
+                Velocity(),
+                Health(max_amount=50),  # У врага меньше здоровья чем у игрока
+                Render(
+                    sprite=sprite,
+                    scale=1.0,
+                    layer=1
+                ),
+                EnemyTag(),
+                Collider(position=position)
             ]
         )

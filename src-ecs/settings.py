@@ -5,10 +5,10 @@ from pathlib import Path
 
 @dataclass
 class ScreenSettngs:
-    WIDTH = 1024
-    HEIGHT = 1024
+    DISPLAY_RATIO = 2
+    WIDTH = 1024/DISPLAY_RATIO
+    HEIGHT = 1024/DISPLAY_RATIO
     BACKGROUND_COLOR = (0, 0, 0)
-    DISPLAY_RATIO = 4
 
 
 @dataclass
