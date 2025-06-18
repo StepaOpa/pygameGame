@@ -21,13 +21,23 @@ class EntityFactory:
 
     def create_player(self, x, y) -> EntityId:
         position = pygame.Vector2(x * settings.TileMap.TILE_SIZE, y * settings.TileMap.TILE_SIZE)
-        sprite = self.assets.get_sprite('Player/idle00.png')
+        # Загружаем кадры анимации простоя игрока
+        frames = []
+        for i in range(4):
+            path = f'Player/idle/idle_{i}.png'
+            frames.append(self.assets.get_sprite(path))
+        if not frames:
+            frames.append(self.assets.get_sprite('Player/idle_0.png'))
+        sprite = frames[0]
         return self.ecs.create_entity(
             [
                 Position(position=position),
                 GridPosition(x=x, y=y),
                 Velocity(),
                 Health(max_amount=100),
+                Attack(damage=10),
+                Inventory(),
+                Animation(frames=frames, frame_time=200),
                 Render(
                     sprite=sprite,
                     scale=1.0,
@@ -55,54 +65,33 @@ class EntityFactory:
                 TileComponent(tile_type=tile_type, variant=variant, walkable=walkable)
             ]
         )
-
-    def create_arrow(self, x: float, y: float, angle: int, speed: float, damage: int) -> EntityId:
-        arrow_radius = 15
-        position = pygame.Vector2(x, y)
-        velocity = pygame.Vector2(
-            math.cos(math.radians(angle)) * speed,
-            math.sin(math.radians(angle)) * speed
-        )
-        return self.ecs.create_entity(
-            [
-                Position(position=position),
-                Collider(position=position, radius=arrow_radius),
-                Velocity(velocity=velocity),
-                DamageOnContact(damage),
-                Render(),
-                RenderTarget(surface=self.display, assets=self.assets)
-            ]
-        )
-
-    def create_dummy(self, x: float = 250, y: float = 250, health: int = 200) -> EntityId:
-        dummy_radius = 50
-        position = pygame.Vector2(x, y)
-        return self.ecs.create_entity(
-            [
-                Position(position=position),
-                Collider(position=position, radius=dummy_radius),
-                Health(max_amount=health),
-                Render(),
-                RenderTarget(surface=self.display, assets=self.assets)
-            ]
-        )
-
-    def create_enemy(self) -> EntityId:
-        # Получаем все проходимые клетки
-        walkable_positions = []
+    
+    def _get_walkable_tiles(self) -> List:
+        walkable_tiles = []
         for entity_id, (grid_pos, tile) in self.ecs.get_entities_with_components(GridPosition, TileComponent):
             if tile.walkable:
-                walkable_positions.append((grid_pos.x, grid_pos.y))
+                walkable_tiles.append((grid_pos.x, grid_pos.y))
+        return walkable_tiles
         
-        if not walkable_positions:
+    
+    def create_enemy(self) -> EntityId:
+        # Получаем все проходимые клетки
+        walkable_tiles = self._get_walkable_tiles()
+        if not walkable_tiles:
             return None
         
         # Выбираем случайную проходимую клетку
-        x, y = random.choice(walkable_positions)
+        x, y = random.choice(walkable_tiles)
         position = pygame.Vector2(x * settings.TileMap.TILE_SIZE, y * settings.TileMap.TILE_SIZE)
         
-        # Используем спрайт врага
-        sprite = self.assets.get_sprite('Enemies/Vampire/vampire_idle.png')
+        # Загружаем кадры анимации врага (пример: vampire_idle.png, vampire_idle2.png...)
+        frames = []
+        for i in range(3):
+            path = f'Enemies/Vampire/vampire_idle_{i}.png'
+            frames.append(self.assets.get_sprite(path))
+        if not frames:
+            frames.append(self.assets.get_sprite('Enemies/Vampire/vampire_idle.png'))
+        sprite = frames[0]
         
         return self.ecs.create_entity(
             [
@@ -110,6 +99,8 @@ class EntityFactory:
                 GridPosition(x=x, y=y),
                 Velocity(),
                 Health(max_amount=50),  # У врага меньше здоровья чем у игрока
+                Attack(damage=5),
+                Animation(frames=frames, frame_time=300),
                 Render(
                     sprite=sprite,
                     scale=1.0,
@@ -119,3 +110,38 @@ class EntityFactory:
                 Collider(position=position)
             ]
         )
+
+    def create_health_potion(self, x, y) -> EntityId:
+        walkable = self._get_walkable_tiles()
+        if not walkable:
+            return None
+        if x is None or y is None or (x, y) not in walkable:
+            x, y = random.choice(walkable)
+
+        position = pygame.Vector2(x * settings.TileMap.TILE_SIZE, y * settings.TileMap.TILE_SIZE)
+
+        sprite = self.assets.get_sprite('items/flask.png')
+        return self.ecs.create_entity([
+            Position(position=position),
+            GridPosition(x=x, y=y),
+            Render(sprite=sprite, scale=1.0, layer=1),
+            Item(name='Health Potion'),
+            HealEffect(amount=30)
+        ])
+
+    def create_bomb_pickup(self, x=None, y=None) -> EntityId:
+        walkable = self._get_walkable_tiles()
+        if not walkable:
+            return None
+        if x is None or y is None or (x, y) not in walkable:
+            x, y = random.choice(walkable)
+
+        position = pygame.Vector2(x * settings.TileMap.TILE_SIZE, y * settings.TileMap.TILE_SIZE)
+        sprite = self.assets.get_sprite('items/coin_1.png')  # Placeholder sprite
+
+        return self.ecs.create_entity([
+            Position(position=position),
+            GridPosition(x=x, y=y),
+            Render(sprite=sprite, scale=1.0, layer=1),
+            Item(name='Bomb'),
+        ])
