@@ -104,7 +104,6 @@ class Render(Component):
         return 0
 
 
-# --- Бой ----------------------------------------------------------------
 
 
 @dataclass(slots=True)
@@ -113,7 +112,6 @@ class Attack(Component):
     damage: int = 1
 
 
-# --- Инвентарь ----------------------------------------------------------
 
 
 @dataclass(slots=True)
@@ -139,7 +137,6 @@ class HealEffect(Component):
     amount: int = 20
 
 
-# --- Бомбы --------------------------------------------------------------
 
 
 @dataclass(slots=True)
@@ -157,7 +154,6 @@ class Bomb(Component):
     state: str = 'ticking'   # 'ticking' ,  'exploding'
 
 
-# --- Маркер для системы взрыва ---------------------------------------
 
 
 @dataclass(slots=True)
@@ -166,7 +162,6 @@ class Explosion(Component):
     frames_created: bool = False
 
 
-# --- Анимации -----------------------------------------------------------
 
 
 @dataclass(slots=True)
@@ -202,10 +197,6 @@ class WizardState(Component):
 
 @dataclass(slots=True)
 class Hitbox(Component):
-    """Прямоугольная область для определения столкновений.
-    offset_x, offset_y — смещение от позиции сущности.
-    width, height — размеры хитбокса в пикселях.
-    """
     offset_x: float = 0.0
     offset_y: float = 0.0
     width: float = 16.0

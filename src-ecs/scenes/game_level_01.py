@@ -18,7 +18,7 @@ class GameSceneLevel01(GameScene):
             level_name="Level 1",
             ground_enemies=2,
             flying_enemies=0,
-            wizard_enemies=0,
+            wizard_enemies=1,
             health_potions=0,
             bombs=0,
         )
