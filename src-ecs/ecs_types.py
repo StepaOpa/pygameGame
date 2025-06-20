@@ -9,7 +9,7 @@ Component = object
 class System(ABC):
     def __init__(self):
         self.required_components = []
-    
+
     @abstractmethod
     def update(self, entity_id: EntityId, components: list[Component], ecs: Any = None):
         """Выполняет обновление состояния для конкретной сущности"""
@@ -19,5 +19,5 @@ class System(ABC):
 @dataclass
 class StoredSystem:
     system: System
-    components: list[Type[Component]]  # Список требуемых компонентов
+    components: list[Type[Component]]
     has_ecs_argument: bool

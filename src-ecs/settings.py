@@ -1,4 +1,5 @@
-from dataclasses import dataclass
+from inventory_data import GLOBAL_STORAGE, ITEM_SPRITE_MAP
+from dataclasses import dataclass, field
 import os
 from pathlib import Path
 
@@ -9,6 +10,7 @@ class ScreenSettngs:
     WIDTH = 1024/DISPLAY_RATIO
     HEIGHT = 1024/DISPLAY_RATIO
     BACKGROUND_COLOR = (0, 0, 0)
+    FONT = 'Verdana'
 
 
 @dataclass
@@ -23,10 +25,11 @@ class TileMap:
     MAP_WIDTH = 16
     MAP_HEIGHT = 16
     TILE_SIZE = 16
-    TEMPLATE_PATH = str(GameSettings.BASE_DIR / 'data' / 'images' / 'Map' / 'chunk_templates' / 'chunck_template_checker_pro.png')
-    
-    FLOOR_TILES = [f'Map/floor/floor_tile_{i}.png' for i in range(12)]  # От 0 до 11
-    
+    TEMPLATE_PATH = str(GameSettings.BASE_DIR / 'data' / 'images' /
+                        'Map' / 'chunk_templates' / 'chunck_template_checker_pro.png')
+
+    FLOOR_TILES = [f'Map/floor/floor_tile_{i}.png' for i in range(12)]
+
     TILE_VARIANTS = {
         'top_left_corner': 'Map/corners/wall_tile_corner_left_down_outer.png',
         'top_right_corner': 'Map/corners/wall_tile_corner_right_down_outer.png',
@@ -36,13 +39,18 @@ class TileMap:
         'bottom': 'Map/walls/wall_tile_bottom_0.png',
         'left': 'Map/walls/wall_tile_left_0.png',
         'right': 'Map/walls/wall_tile_right_0.png',
-        'floor': 'Map/floor/floor_tile_0.png'  # Это будет дефолтный тайл
+        'floor': 'Map/floor/floor_tile_0.png',
+        'empty': 'Map/wall_empty.png',
+        'stairs': 'Map/ladder.png'
     }
 
     COLORS = {
-        'empty': (0, 0, 0, 255),
+        'empty': (0, 0, 0, 0),
         'wall': (0, 255, 0, 255),
-        'floor': (143, 86, 59, 255)
+        'floor': (143, 86, 59, 255),
+        'spawn': (255, 255, 0, 255),
+        'exit': (0, 255, 255, 255),
+        'entry': (255, 0, 0, 255)
     }
 
 

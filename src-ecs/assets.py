@@ -146,7 +146,7 @@ class AssetManager:
         """Возвращает спрайт по пути, используя кэш"""
         if sprite_path in self.sprite_cache:
             return self.sprite_cache[sprite_path]
-        
+
         path = self.base_path / sprite_path
         sprite = self._load_image(path)
         self.sprite_cache[sprite_path] = sprite

@@ -24,6 +24,25 @@ class EntityComponentSystem:
         self.on_create = on_create
         self.on_remove = on_remove
 
+    # ------------------------------------------------------------------
+    # Внутренние утилиты
+    # ------------------------------------------------------------------
+
+    def _auto_add_global_systems(self):
+        """Добавляет в ECS системы, которые должны существовать во всех
+        сценах – например, систему сохранения инвентаря.
+        """
+        try:
+            from systems import InventoryPersistenceSystem
+            for stored in self._systems:
+                if isinstance(stored.system, InventoryPersistenceSystem):
+                    break
+            else:
+                self.add_system(InventoryPersistenceSystem())
+        except Exception as exc:
+            print(
+                f"[ECS] Не удалось добавить InventoryPersistenceSystem: {exc}")
+
     def _unsafe_get_component(self, entity_id: EntityId, component_class: Type[Component]) -> Component:
         """
         Возвращает компонент сущности с типом переданного класса component_class
@@ -53,7 +72,7 @@ class EntityComponentSystem:
         stored = StoredSystem(
             system=system,
             components=system.required_components,
-            has_ecs_argument=True  # Всегда передаем ECS в системы
+            has_ecs_argument=True
         )
         self._systems.append(stored)
 
@@ -72,7 +91,10 @@ class EntityComponentSystem:
         Можно задавать свой entity_id но он обязан быть уникальным
         """
         if entity_id is None:
-            entity_id = str(len(self._entities))
+            entity_id = UniqueIdGenerator.generate_id()
+
+        while entity_id in self._entities:
+            entity_id = UniqueIdGenerator.generate_id()
 
         for component in components:
             self._components[component.__class__][entity_id] = component
@@ -100,7 +122,7 @@ class EntityComponentSystem:
         """
         for entity_id in self.get_entity_ids_with_components(*component_classes):
             components = tuple(self._unsafe_get_component(entity_id, component_class)
-                             for component_class in component_classes)
+                               for component_class in component_classes)
             yield entity_id, components
 
     def update(self) -> None:
@@ -111,8 +133,8 @@ class EntityComponentSystem:
         for stored_system in self._systems:
             for entity_id in self.get_entity_ids_with_components(*stored_system.components):
                 components = [self._unsafe_get_component(entity_id, component_class)
-                            for component_class in stored_system.components]
-                
+                              for component_class in stored_system.components]
+
                 if stored_system.has_ecs_argument:
                     stored_system.system.update(entity_id, components, self)
                 else:
@@ -144,6 +166,6 @@ class EntityComponentSystem:
         """
         try:
             return tuple(self._unsafe_get_component(entity_id, component_class)
-                        for component_class in component_classes)
+                         for component_class in component_classes)
         except KeyError:
             return None

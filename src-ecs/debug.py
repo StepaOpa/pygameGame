@@ -1,1 +1,2 @@
 IS_DEBUG = False
+SHOW_HITBOXES = True

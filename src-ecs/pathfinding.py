@@ -2,12 +2,13 @@ from typing import Dict, List, Tuple, Set
 import heapq
 import math
 
+
 class Node:
-    def __init__(self, position: Tuple[int, int], g_cost: float = float('inf'), 
+    def __init__(self, position: Tuple[int, int], g_cost: float = float('inf'),
                  h_cost: float = 0, parent: 'Node' = None):
         self.position = position
-        self.g_cost = g_cost  # стоимость от начала до текущей точки
-        self.h_cost = h_cost  # эвристическая оценка до цели
+        self.g_cost = g_cost
+        self.h_cost = h_cost
         self.parent = parent
 
     @property
@@ -17,12 +18,12 @@ class Node:
     def __lt__(self, other: 'Node') -> bool:
         return self.f_cost < other.f_cost
 
+
 class AStar:
     def __init__(self):
-        self.directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]  # 4 направления движения
+        self.directions = [(0, 1), (1, 0), (0, -1), (-1, 0)]
 
     def heuristic(self, start: Tuple[int, int], end: Tuple[int, int]) -> float:
-        # Манхэттенское расстояние
         return abs(end[0] - start[0]) + abs(end[1] - start[1])
 
     def get_neighbors(self, current: Tuple[int, int], walkable_tiles: Set[Tuple[int, int]]) -> List[Tuple[int, int]]:
@@ -33,26 +34,22 @@ class AStar:
                 neighbors.append(neighbor)
         return neighbors
 
-    def find_path(self, start: Tuple[int, int], end: Tuple[int, int], 
+    def find_path(self, start: Tuple[int, int], end: Tuple[int, int],
                   walkable_tiles: Set[Tuple[int, int]]) -> List[Tuple[int, int]]:
         if start not in walkable_tiles or end not in walkable_tiles:
             return []
 
-        # Инициализация начального узла
         start_node = Node(start, g_cost=0, h_cost=self.heuristic(start, end))
-        
-        # Открытый и закрытый списки
+
         open_list: List[Node] = [start_node]
         closed_set: Set[Tuple[int, int]] = set()
-        
-        # Словарь для хранения узлов по позициям
+
         nodes: Dict[Tuple[int, int], Node] = {start: start_node}
 
         while open_list:
             current = heapq.heappop(open_list)
 
             if current.position == end:
-                # Восстанавливаем путь
                 path = []
                 while current:
                     path.append(current.position)
@@ -65,7 +62,7 @@ class AStar:
                 if neighbor_pos in closed_set:
                     continue
 
-                g_cost = current.g_cost + 1  # стоимость движения = 1
+                g_cost = current.g_cost + 1
 
                 if neighbor_pos not in nodes:
                     neighbor = Node(
@@ -84,4 +81,4 @@ class AStar:
                         if neighbor not in open_list:
                             heapq.heappush(open_list, neighbor)
 
-        return []  # путь не найден 
+        return []

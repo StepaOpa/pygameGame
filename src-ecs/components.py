@@ -20,8 +20,8 @@ class PlayerTag(Component):
 class TurnComponent(Component):
     """Компонент для отслеживания состояния хода"""
     is_player_turn: bool = True
-    player_moved: bool = False  # Флаг, показывающий, сделал ли игрок ход
-    turn_count: int = 0  # Счетчик ходов игрока
+    player_moved: bool = False
+    turn_count: int = 0
 
 
 @dataclass(slots=True)
@@ -30,26 +30,15 @@ class EnemyTag(Component):
 
 
 @dataclass(slots=True)
-class Collider(Component):
-    position: pygame.Vector2
-    radius: float = 0
-
-    def distance(self, other: 'Collider'):
-        return math.sqrt((self.position.x - other.position.x) ** 2 + (self.position.y - other.position.y) ** 2)
-
-    def is_intersecting(self, other: 'Collider'):
-        return self.distance(other) <= (self.radius + other.radius)
+class FlyingEnemyTag(Component):
+    """Отмечает врагов, которые ходят каждый ход игрока."""
+    pass
 
 
 @dataclass(slots=True)
 class Velocity(Component):
-    velocity: pygame.Vector2 = field(default_factory=lambda: pygame.Vector2(0, 0))
-
-
-@dataclass(slots=True)
-class DamageOnContact(Component):
-    damage: int
-    die_on_contact: bool = True
+    velocity: pygame.Vector2 = field(
+        default_factory=lambda: pygame.Vector2(0, 0))
 
 
 @dataclass(slots=True)
@@ -131,6 +120,7 @@ class Attack(Component):
 class InventoryItem:
     name: str
     sprite: pygame.Surface
+    sprite_path: str = ""
 
 
 @dataclass(slots=True)
@@ -154,10 +144,26 @@ class HealEffect(Component):
 
 @dataclass(slots=True)
 class Bomb(Component):
-    turns_left: int = 3  # ходов до взрыва
-    radius: int = 1  # расстояние по манхэттену
+    """Бомба со 'state-machine'.
+
+    Состояния:
+        • ticking   – ещё тикает.
+        • exploding – перешла во взрыв (обработка урона и спрайта).
+    """
+    planted_turn: int = 0
+    fuse_turns: int = 3
+    radius: int = 1
     damage: int = 25
-    last_turn_processed: int = -1  # вспомогательное поле, не сериализуется
+    state: str = 'ticking'   # 'ticking' ,  'exploding'
+
+
+# --- Маркер для системы взрыва ---------------------------------------
+
+
+@dataclass(slots=True)
+class Explosion(Component):
+    """Помечает сущность, у которой надо отрисовать/проиграть взрыв."""
+    frames_created: bool = False
 
 
 # --- Анимации -----------------------------------------------------------
@@ -166,8 +172,50 @@ class Bomb(Component):
 @dataclass(slots=True)
 class Animation(Component):
     frames: list[pygame.Surface]
-    frame_time: int = 100  # мс на кадр
+    frame_time: int = 100
     loop: bool = True
-    destroy_on_end: bool = False  # уничтожить сущность после завершения анимации (если loop=False)
+    destroy_on_end: bool = False
     elapsed: int = 0
     current_frame: int = 0
+
+
+@dataclass(slots=True)
+class WizardTag(Component):
+    """Тег для обозначения врага-волшебника (Wizard)."""
+    pass
+
+
+@dataclass(slots=True)
+class Fireball(Component):
+    """Снаряд, летящий по прямой к цели в пиксельных координатах.
+    velocity_x, velocity_y — скорость в пикселях за обновление.
+    """
+    velocity_x: float
+    velocity_y: float
+    damage: int = 15
+
+
+@dataclass(slots=True)
+class WizardState(Component):
+    last_shot_turn: int = -2
+
+
+@dataclass(slots=True)
+class Hitbox(Component):
+    """Прямоугольная область для определения столкновений.
+    offset_x, offset_y — смещение от позиции сущности.
+    width, height — размеры хитбокса в пикселях.
+    """
+    offset_x: float = 0.0
+    offset_y: float = 0.0
+    width: float = 16.0
+    height: float = 16.0
+
+    def get_rect(self, position: 'Position') -> pygame.Rect:
+        """Возвращает pygame.Rect хитбокса в мировых координатах."""
+        return pygame.Rect(
+            position.position.x + self.offset_x,
+            position.position.y + self.offset_y,
+            self.width,
+            self.height
+        )
